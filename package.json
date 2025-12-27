@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "lorentz-auth-backend",
   "version": "1.0.0",
   "description": "Lorentz authentication backend",
   "main": "server.js",
