@@ -16,6 +16,7 @@ const app = express();
 const allowedOrigins = [
   'https://videowala.vercel.app',
   'http://localhost:3000',
+  'https://happy-rock-0fc3e3600.2.azurestaticapps.net'
 ];
 
 app.use(
