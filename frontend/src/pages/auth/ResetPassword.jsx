@@ -1,4 +1,4 @@
-import { Box, Typography, Alert, IconButton } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 

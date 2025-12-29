@@ -8,7 +8,7 @@ import { useState } from 'react';
 
 import AuthInput from '../../components/common/AuthInput';
 import AuthButton from '../../components/common/AuthButton';
-import { forgotPassword, resetPassword, verifyOtp } from '../../services/authService';
+import { resetPassword, verifyOtp } from '../../services/authService';
 import OtpDialog from './OtpDialog';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,7 +31,6 @@ const ForgotPassword = () => {
   // UI STATES
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const navigate= useNavigate()
@@ -42,7 +41,7 @@ const ForgotPassword = () => {
   ========================== */
   const handleSendOtp = async () => {
     setError('');
-    setSuccess('');
+
     setLoading(true);
 
     if (!email) {
@@ -52,8 +51,6 @@ const ForgotPassword = () => {
     }
 
     try {
-      const res = await forgotPassword({ email });
-
       // move to OTP step
       setStep(2);
 
@@ -114,7 +111,6 @@ const ForgotPassword = () => {
   ========================== */
   const handleResetPassword = async () => {
     setError('');
-    setSuccess('');
     setLoading(true);
 
     if (!newPassword || !confirmPassword) {
@@ -142,8 +138,6 @@ const ForgotPassword = () => {
         token: otp,
         newPassword,
       });
-
-      setSuccess('Password reset successful. Please login.');
       navigate('/login')
     } catch (err) {
       setError(err.response?.data?.message || 'Reset failed');
