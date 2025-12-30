@@ -3,15 +3,15 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const authRoutes = require('./routes/auth.routes');
+const videoRoutes = require('./routes/video.routes'); // ✅ NEW
 
 const app = express();
 
 /**
  * CORS CONFIG (PRODUCTION SAFE)
- * - Allows Vercel frontend
- * - Allows localhost for testing
  */
 const allowedOrigins = [
   'https://videowala.vercel.app',
@@ -41,9 +41,17 @@ app.use(
 app.use(express.json());
 
 /**
+ * Serve uploaded files
+ * Example:
+ * https://your-backend-url/uploads/videos/filename.mp4
+ */
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+/**
  * Routes
  */
 app.use('/auth', authRoutes);
+app.use('/videos', videoRoutes); // ✅ NEW (VIDEO MODULE)
 
 /**
  * Health check
