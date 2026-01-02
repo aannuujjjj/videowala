@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+
+const API = 'https://walavideo-backend.azurewebsites.net';
 
 const UploadVideo = () => {
   const [video, setVideo] = useState(null);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const handleFileChange = (e) => {
-    setVideo(e.target.files[0]);
+  const token = localStorage.getItem('token');
+
+  const fetchVideos = async () => {
+    try {
+      const res = await axios.get(`${API}/videos/my-videos`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setVideos(res.data.videos);
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   const handleUpload = async () => {
     if (!video) {
@@ -23,28 +41,34 @@ const UploadVideo = () => {
       setLoading(true);
       setMessage('');
 
-      const token = localStorage.getItem('token'); // same token you already use
-
-      const res = await axios.post(
-        `https://walavideo-backend.azurewebsites.net/videos/upload`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
+      await axios.post(`${API}/videos/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
         }
-      );
+      });
 
-      setMessage(res.data.message || 'Video uploaded');
+      setMessage('Video uploaded');
       setVideo(null);
+      fetchVideos();
 
     } catch (err) {
-      setMessage(
-        err.response?.data?.message || 'Upload failed'
-      );
+      setMessage(err.response?.data?.message || 'Upload failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${API}/videos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      fetchVideos();
+    } catch (err) {
+      alert('Delete failed');
     }
   };
 
@@ -55,7 +79,7 @@ const UploadVideo = () => {
       <input
         type="file"
         accept="video/*"
-        onChange={handleFileChange}
+        onChange={(e) => setVideo(e.target.files[0])}
       />
 
       <br /><br />
@@ -65,6 +89,22 @@ const UploadVideo = () => {
       </button>
 
       <p>{message}</p>
+
+      <hr />
+
+      <h4>Your Videos</h4>
+
+      {videos.length === 0 && <p>No videos uploaded</p>}
+
+      {videos.map((v) => (
+        <div key={v._id} style={{ marginBottom: '15px' }}>
+          <video width="300" controls>
+            <source src={`${API}/${v.videoPath}`} type="video/mp4" />
+          </video>
+          <br />
+          <button onClick={() => handleDelete(v._id)}>Delete</button>
+        </div>
+      ))}
     </div>
   );
 };
