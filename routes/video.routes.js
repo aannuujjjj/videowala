@@ -18,9 +18,7 @@ router.post(
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({
-          message: 'No video uploaded'
-        });
+        return res.status(400).json({ message: 'No video uploaded' });
       }
 
       const userId = req.user.id;
@@ -33,14 +31,10 @@ router.post(
       if (existingVideos.length >= 3) {
         const oldestVideo = existingVideos[0];
 
-        const filePath = path.join(
-          __dirname,
-          '..',
-          oldestVideo.videoPath
-        );
+        const absolutePath = path.resolve(oldestVideo.videoPath);
 
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath); // HARD DELETE from server
+        if (fs.existsSync(absolutePath)) {
+          fs.unlinkSync(absolutePath); // HARD DELETE
         }
 
         await Video.findByIdAndDelete(oldestVideo._id);
@@ -49,7 +43,7 @@ router.post(
       // 3️⃣ Save new video record
       const newVideo = await Video.create({
         user: userId,
-        videoPath: req.file.path,
+        videoPath: req.file.path, // relative path
         originalName: req.file.originalname,
         size: req.file.size
       });
@@ -61,9 +55,7 @@ router.post(
 
     } catch (error) {
       console.error('Video upload error:', error);
-      return res.status(500).json({
-        message: 'Video upload failed'
-      });
+      return res.status(500).json({ message: 'Video upload failed' });
     }
   }
 );
@@ -76,14 +68,10 @@ router.get('/my-videos', authMiddleware, async (req, res) => {
     const videos = await Video.find({ user: req.user.id })
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      videos
-    });
+    return res.status(200).json({ videos });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: 'Failed to fetch videos'
-    });
+    console.error('Fetch videos error:', error);
+    return res.status(500).json({ message: 'Failed to fetch videos' });
   }
 });
 
@@ -92,34 +80,36 @@ router.get('/my-videos', authMiddleware, async (req, res) => {
 // ============================
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const video = await Video.findOne({
-      _id: req.params.id,
-      user: req.user.id
-    });
+    const videoId = req.params.id;
+    const userId = req.user.id;
+
+    // 1️⃣ Find video
+    const video = await Video.findById(videoId);
 
     if (!video) {
-      return res.status(404).json({
-        message: 'Video not found'
-      });
+      return res.status(404).json({ message: 'Video not found' });
     }
 
-    const filePath = path.join(__dirname, '..', video.videoPath);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath); // HARD DELETE
+    // 2️⃣ Ownership check
+    if (video.user.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to delete this video' });
     }
 
-    await Video.findByIdAndDelete(video._id);
+    // 3️⃣ Delete file from server
+    const absolutePath = path.resolve(video.videoPath);
 
-    return res.status(200).json({
-      message: 'Video deleted successfully'
-    });
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath); // HARD DELETE
+    }
+
+    // 4️⃣ Delete DB record
+    await Video.findByIdAndDelete(videoId);
+
+    return res.status(200).json({ message: 'Video deleted successfully' });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: 'Failed to delete video'
-    });
+    console.error('Delete video error:', error);
+    return res.status(500).json({ message: 'Failed to delete video' });
   }
 });
 

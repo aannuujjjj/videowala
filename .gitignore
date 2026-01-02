@@ -23,3 +23,6 @@ yarn-error.log*
 
 # ====== CACHE ======
 *.log
+
+# ====== UPLOADED FILES ======
+uploads/
