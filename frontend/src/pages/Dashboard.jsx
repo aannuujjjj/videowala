@@ -1,6 +1,12 @@
+import UploadVideo from '../components/UploadVideo';
+
 const Dashboard = () => {
   return (
-    <h1>Welcome to Dashboard</h1>
+    <div>
+      <h1>Welcome to Dashboard</h1>
+
+      <UploadVideo />
+    </div>
   );
 };
 

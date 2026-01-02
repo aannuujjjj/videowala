@@ -55,26 +55,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/auth', authRoutes);
 app.use('/videos', videoRoutes);
 
-/**
- * 🔧 TEMPORARY: FFmpeg test route
- * This is ONLY to verify ffmpeg works on Azure
- */
-app.get('/test-ffmpeg', (req, res) => {
-  exec('./bin/ffmpeg -version', (error, stdout, stderr) => {
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        error: error.message,
-        stderr
-      });
-    }
 
-    return res.status(200).json({
-      success: true,
-      output: stdout
-    });
-  });
-});
 
 /**
  * Health check
