@@ -26,7 +26,7 @@ const UploadVideo = () => {
       const token = localStorage.getItem('token'); // same token you already use
 
       const res = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/videos/upload`,
+        `https://walavideo-backend.azurewebsites.net/videos/upload`,
         formData,
         {
           headers: {
