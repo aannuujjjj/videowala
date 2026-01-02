@@ -1,44 +1,126 @@
 const express = require('express');
 const router = express.Router();
+
 const authMiddleware = require('../middleware/auth.middleware');
 const uploadVideo = require('../middleware/multerVideo');
+const Video = require('../models/Video');
 
-// Upload video (now functional)
+const fs = require('fs');
+const path = require('path');
+
+// ============================
+// Upload video (max 3 per user)
+// ============================
 router.post(
   '/upload',
   authMiddleware,
   uploadVideo.single('video'),
-  (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({
-        message: 'No video uploaded'
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          message: 'No video uploaded'
+        });
+      }
+
+      const userId = req.user.id;
+
+      // 1️⃣ Fetch existing videos (oldest first)
+      const existingVideos = await Video.find({ user: userId })
+        .sort({ createdAt: 1 });
+
+      // 2️⃣ If already 3 videos, delete the oldest
+      if (existingVideos.length >= 3) {
+        const oldestVideo = existingVideos[0];
+
+        const filePath = path.join(
+          __dirname,
+          '..',
+          oldestVideo.videoPath
+        );
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath); // HARD DELETE from server
+        }
+
+        await Video.findByIdAndDelete(oldestVideo._id);
+      }
+
+      // 3️⃣ Save new video record
+      const newVideo = await Video.create({
+        user: userId,
+        videoPath: req.file.path,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+
+      return res.status(201).json({
+        message: 'Video uploaded successfully',
+        video: newVideo
+      });
+
+    } catch (error) {
+      console.error('Video upload error:', error);
+      return res.status(500).json({
+        message: 'Video upload failed'
       });
     }
-
-    return res.status(200).json({
-      message: 'Video uploaded temporarily',
-      file: {
-        filename: req.file.filename,
-        path: req.file.path,
-        size: req.file.size,
-        mimetype: req.file.mimetype
-      }
-    });
   }
 );
 
-// Get logged-in user's videos (still placeholder)
-router.get('/my-videos', authMiddleware, (req, res) => {
-  return res.status(200).json({
-    message: 'My videos route reachable'
-  });
+// ============================
+// Get logged-in user's videos
+// ============================
+router.get('/my-videos', authMiddleware, async (req, res) => {
+  try {
+    const videos = await Video.find({ user: req.user.id })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      videos
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Failed to fetch videos'
+    });
+  }
 });
 
-// Delete video (still placeholder)
-router.delete('/:id', authMiddleware, (req, res) => {
-  return res.status(200).json({
-    message: 'Delete route reachable'
-  });
+// ============================
+// Delete a video (hard delete)
+// ============================
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const video = await Video.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+
+    if (!video) {
+      return res.status(404).json({
+        message: 'Video not found'
+      });
+    }
+
+    const filePath = path.join(__dirname, '..', video.videoPath);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath); // HARD DELETE
+    }
+
+    await Video.findByIdAndDelete(video._id);
+
+    return res.status(200).json({
+      message: 'Video deleted successfully'
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Failed to delete video'
+    });
+  }
 });
 
 module.exports = router;
