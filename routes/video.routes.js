@@ -34,8 +34,7 @@ router.post(
       const userId = req.user.id;
 
       // Normalize path for DB (Linux-safe)
-      const relativeVideoPath = `uploads/videos/${req.file.filename}`;
-
+      
       // 1️⃣ Fetch existing videos (oldest first)
       const existingVideos = await Video.find({ user: userId })
         .sort({ createdAt: 1 });
