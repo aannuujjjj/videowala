@@ -2,20 +2,26 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const compressVideo = (relativeInputPath) => {
+const compressVideo = (inputPath) => {
   return new Promise((resolve, reject) => {
-    const rootDir = process.cwd(); // Azure-safe root
+    const rootDir = process.cwd();
 
-    const ffmpegPath = path.join(rootDir, 'bin', 'ffmpeg');
+    // If multer already gave absolute path, use it directly
+    const absoluteInputPath = path.isAbsolute(inputPath)
+      ? inputPath
+      : path.join(rootDir, inputPath);
 
-    const absoluteInputPath = path.join(rootDir, relativeInputPath);
-
-    const relativeOutputPath = relativeInputPath.replace(
-      path.extname(relativeInputPath),
+    // Build output path (relative + absolute)
+    const relativeOutputPath = inputPath.replace(
+      path.extname(inputPath),
       '-compressed.mp4'
     );
 
-    const absoluteOutputPath = path.join(rootDir, relativeOutputPath);
+    const absoluteOutputPath = path.isAbsolute(relativeOutputPath)
+      ? relativeOutputPath
+      : path.join(rootDir, relativeOutputPath);
+
+    const ffmpegPath = path.join(rootDir, 'bin', 'ffmpeg');
 
     const command = `"${ffmpegPath}" -i "${absoluteInputPath}" -vf "scale='min(1280,iw)':-2" -b:v 800k -preset veryfast -y "${absoluteOutputPath}"`;
 
@@ -25,10 +31,15 @@ const compressVideo = (relativeInputPath) => {
         return reject(error);
       }
 
-      // HARD delete original file
+      // HARD delete original
       fs.unlinkSync(absoluteInputPath);
 
-      resolve(relativeOutputPath); // store relative path in DB
+      // Always store RELATIVE path in DB
+      const cleanRelativePath = relativeOutputPath.startsWith(rootDir)
+        ? relativeOutputPath.replace(rootDir + '/', '')
+        : relativeOutputPath;
+
+      resolve(cleanRelativePath);
     });
   });
 };
