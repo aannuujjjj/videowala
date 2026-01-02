@@ -39,6 +39,8 @@ app.use(
  * Body parser
  */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 /**
  * Serve uploaded files
