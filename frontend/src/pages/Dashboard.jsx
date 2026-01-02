@@ -1,4 +1,4 @@
-import UploadVideo from '../components/UploadVideo';
+import UploadVideo from '../components/common/UploadVideo';
 
 const Dashboard = () => {
   return (
