@@ -4,23 +4,20 @@ const fs = require('fs');
 
 const compressVideo = (relativeInputPath) => {
   return new Promise((resolve, reject) => {
-    // Convert to absolute paths (CRITICAL FIX)
-    const absoluteInputPath = path.join(process.cwd(), relativeInputPath);
+    const rootDir = process.cwd(); // Azure-safe root
+
+    const ffmpegPath = path.join(rootDir, 'bin', 'ffmpeg');
+
+    const absoluteInputPath = path.join(rootDir, relativeInputPath);
 
     const relativeOutputPath = relativeInputPath.replace(
       path.extname(relativeInputPath),
       '-compressed.mp4'
     );
 
-    const absoluteOutputPath = path.join(process.cwd(), relativeOutputPath);
+    const absoluteOutputPath = path.join(rootDir, relativeOutputPath);
 
-    const command = `
-      ./bin/ffmpeg -i "${absoluteInputPath}"
-      -vf "scale='min(1280,iw)':-2"
-      -b:v 800k
-      -preset veryfast
-      -y "${absoluteOutputPath}"
-    `;
+    const command = `"${ffmpegPath}" -i "${absoluteInputPath}" -vf "scale='min(1280,iw)':-2" -b:v 800k -preset veryfast -y "${absoluteOutputPath}"`;
 
     exec(command, (error) => {
       if (error) {
@@ -28,10 +25,10 @@ const compressVideo = (relativeInputPath) => {
         return reject(error);
       }
 
-      // HARD DELETE original
+      // HARD delete original file
       fs.unlinkSync(absoluteInputPath);
 
-      resolve(relativeOutputPath); // store RELATIVE path in DB
+      resolve(relativeOutputPath); // store relative path in DB
     });
   });
 };
