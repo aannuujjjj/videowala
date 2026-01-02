@@ -4,9 +4,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const { exec } = require('child_process'); // ✅ for ffmpeg test
 
 const authRoutes = require('./routes/auth.routes');
-const videoRoutes = require('./routes/video.routes'); // ✅ NEW
+const videoRoutes = require('./routes/video.routes');
 
 const app = express();
 
@@ -41,7 +42,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 /**
  * Serve uploaded files
  * Example:
@@ -53,7 +53,28 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
  * Routes
  */
 app.use('/auth', authRoutes);
-app.use('/videos', videoRoutes); // ✅ NEW (VIDEO MODULE)
+app.use('/videos', videoRoutes);
+
+/**
+ * 🔧 TEMPORARY: FFmpeg test route
+ * This is ONLY to verify ffmpeg works on Azure
+ */
+app.get('/test-ffmpeg', (req, res) => {
+  exec('./bin/ffmpeg -version', (error, stdout, stderr) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+        stderr
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      output: stdout
+    });
+  });
+});
 
 /**
  * Health check
