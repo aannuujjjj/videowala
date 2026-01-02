@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/auth.middleware');
 const uploadVideo = require('../middleware/multerVideo');
 const Video = require('../models/Video');
+const compressVideo = require('../utils/compressVideo')
 
 const fs = require('fs');
 const path = require('path');
@@ -54,13 +55,18 @@ router.post(
         await Video.findByIdAndDelete(oldestVideo._id);
       }
 
-      // 3️⃣ Save new video record
+     
+      // 3. Compress video
+      const compressedPath = await compressVideo(req.file.path);
+
+      // 4. Save compressed video info in DB
       const newVideo = await Video.create({
         user: userId,
-        videoPath: relativeVideoPath,
+        videoPath: compressedPath,
         originalName: req.file.originalname,
         size: req.file.size
       });
+
 
       return res.status(201).json({
         message: 'Video uploaded successfully',
