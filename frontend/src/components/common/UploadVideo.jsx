@@ -15,14 +15,19 @@ const UploadVideo = () => {
     try {
       const res = await axios.get(`${API}/videos/my-videos`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      console.log('VIDEOS FROM API:', res.data);
+
+      console.log('VIDEOS RESPONSE:', res.data);
       setVideos(res.data.videos);
 
     } catch (err) {
-      console.error(err);
+      console.error(
+        'FETCH VIDEOS ERROR:',
+        err.response?.status,
+        err.response?.data
+      );
     }
   };
 
