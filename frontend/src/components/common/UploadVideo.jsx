@@ -20,7 +20,7 @@ const UploadVideo = () => {
       });
       console.log('VIDEOS FROM API:', res.data);
       setVideos(res.data.videos);
-      
+
     } catch (err) {
       console.error(err);
     }
@@ -76,8 +76,9 @@ const UploadVideo = () => {
 
   return (
     <div>
-      <h3>Upload Video</h3>
-
+      <h3 style={{ color: 'red', fontSize: '24px' }}>
+        UPLOAD VIDEO FROM COMMON COMPONENT
+      </h3>
       <input
         type="file"
         accept="video/*"
