@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-console.error('🔥 AZURE BUILD TESTt – THIS MUST SHOW 🔥');
+
+console.error('🔥 AZURE BUILD TEST – THIS MUST SHOW 🔥');
 
 const API = 'https://walavideo-backend.azurewebsites.net';
 
@@ -12,7 +13,8 @@ const UploadVideo = () => {
 
   const token = localStorage.getItem('token');
 
-  const fetchVideos = async () => {
+  // ✅ FIX: wrap in useCallback
+  const fetchVideos = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/videos/my-videos`, {
         headers: {
@@ -22,7 +24,6 @@ const UploadVideo = () => {
 
       console.log('VIDEOS RESPONSE:', res.data);
       setVideos(res.data.videos);
-
     } catch (err) {
       console.error(
         'FETCH VIDEOS ERROR:',
@@ -30,11 +31,12 @@ const UploadVideo = () => {
         err.response?.data
       );
     }
-  };
+  }, [token]);
 
+  // ✅ FIX: add dependency
   useEffect(() => {
     fetchVideos();
-  }, []);
+  }, [fetchVideos]);
 
   const handleUpload = async () => {
     if (!video) {
@@ -52,14 +54,13 @@ const UploadVideo = () => {
       await axios.post(`${API}/videos/upload`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       setMessage('Video uploaded');
       setVideo(null);
       fetchVideos();
-
     } catch (err) {
       setMessage(err.response?.data?.message || 'Upload failed');
     } finally {
@@ -71,8 +72,8 @@ const UploadVideo = () => {
     try {
       await axios.delete(`${API}/videos/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       fetchVideos();
     } catch (err) {
@@ -85,6 +86,7 @@ const UploadVideo = () => {
       <h3 style={{ color: 'red', fontSize: '24px' }}>
         UPLOAD VIDEO FROM COMMON COMPONENT
       </h3>
+
       <input
         type="file"
         accept="video/*"
