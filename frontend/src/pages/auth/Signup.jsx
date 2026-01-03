@@ -24,7 +24,7 @@ const Signup = () => {
   });
 
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // ✅ ADD
+  const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -40,9 +40,8 @@ const Signup = () => {
     return minLength && hasUppercase && hasAlphanumeric;
   };
 
-  // ✅ FIXED handleSubmit
   const handleSubmit = async () => {
-    if (loading) return; // ✅ BLOCK MULTIPLE CLICKS
+    if (loading) return;
 
     setError('');
 
@@ -59,7 +58,7 @@ const Signup = () => {
     }
 
     try {
-      setLoading(true); // ✅ START LOADING
+      setLoading(true);
 
       await registerUser({
         username: form.username,
@@ -72,15 +71,10 @@ const Signup = () => {
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
 
-      // ✅ ONLY ONE NAVIGATION
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
-
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');
     } finally {
-      setLoading(false); // ✅ END LOADING
+      setLoading(false);
     }
   };
 
@@ -91,22 +85,36 @@ const Signup = () => {
         display={{ xs: 'none', md: 'flex' }}
         sx={{ background: 'linear-gradient(135deg, #1976d2, #d32f2f)' }}
       >
-        <img src={Logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
       </Box>
 
       <Box flex={1} display="flex" justifyContent="center" alignItems="center" bgcolor="#f4f6f8">
+        {/* ✅ FIXED SNACKBAR */}
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          onClose={() => {
+            setSnackbarOpen(false);
+            navigate('/'); // ✅ navigate AFTER snackbar closes
+          }}
         >
           <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
             {snackbarMessage}
           </Alert>
         </Snackbar>
 
-        <Box width={420} bgcolor="#fff" p={4} borderRadius={3} boxShadow="0 10px 40px rgba(0,0,0,0.1)">
+        <Box
+          width={420}
+          bgcolor="#fff"
+          p={4}
+          borderRadius={3}
+          boxShadow="0 10px 40px rgba(0,0,0,0.1)"
+        >
           <Typography variant="h4" textAlign="center" mb={1}>
             Create Account
           </Typography>
@@ -119,7 +127,13 @@ const Signup = () => {
           <AuthInput label="Username" name="username" value={form.username} onChange={handleChange} />
           <AuthInput label="Email" name="email" value={form.email} onChange={handleChange} />
           <AuthInput label="Password" type="password" name="password" value={form.password} onChange={handleChange} />
-          <AuthInput label="Confirm Password" type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} />
+          <AuthInput
+            label="Confirm Password"
+            type="password"
+            name="confirmPassword"
+            value={form.confirmPassword}
+            onChange={handleChange}
+          />
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
@@ -132,14 +146,17 @@ const Signup = () => {
 
           <AuthButton
             onClick={handleSubmit}
-            disabled={loading} // ✅ DISABLE BUTTON
+            disabled={loading}
             sx={{ mt: 2, background: 'linear-gradient(90deg, #1976d2, #d32f2f)' }}
           >
             {loading ? 'Creating...' : 'Create Account'}
           </AuthButton>
 
           <Typography variant="body2" textAlign="center" mt={3}>
-            Already have an account? <Link href="/" underline="none">Login</Link>
+            Already have an account?{' '}
+            <Link href="/" underline="none">
+              Login
+            </Link>
           </Typography>
         </Box>
       </Box>
