@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-console.error('🔥 AZURE BUILD TEST – THIS MUST SHOW 🔥');
+console.error('🔥 AZURE BUILD TESTt – THIS MUST SHOW 🔥');
 
 const API = 'https://walavideo-backend.azurewebsites.net';
 
