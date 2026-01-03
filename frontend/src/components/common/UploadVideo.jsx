@@ -18,7 +18,9 @@ const UploadVideo = () => {
           Authorization: `Bearer ${token}`
         }
       });
+      console.log('VIDEOS FROM API:', res.data);
       setVideos(res.data.videos);
+      
     } catch (err) {
       console.error(err);
     }
