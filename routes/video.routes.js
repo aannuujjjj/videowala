@@ -4,22 +4,26 @@ const router = express.Router();
 const authMiddleware = require('../middleware/auth.middleware');
 const uploadVideo = require('../middleware/multerVideo');
 const Video = require('../models/Video');
-const compressVideo = require('../utils/compressVideo')
+const compressVideo = require('../utils/compressVideo');
 
 const fs = require('fs');
 const path = require('path');
 
+// ============================
 // Helper: safely delete file
+// ============================
 const deleteFileIfExists = (filePath) => {
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    return !fs.existsSync(filePath); // confirm deletion
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (err) {
+    console.error('File delete error:', err);
   }
-  return true;
 };
 
 // ============================
-// Upload video (max 3 per user)
+// Upload video (auto keep max 3)
 // ============================
 router.post(
   '/upload',
@@ -33,32 +37,13 @@ router.post(
 
       const userId = req.user.id;
 
-      // Normalize path for DB (Linux-safe)
-      
-      // 1️⃣ Fetch existing videos (oldest first)
-      const existingVideos = await Video.find({ user: userId })
-        .sort({ createdAt: 1 });
-
-      // 2️⃣ If already 3 videos, delete oldest
-      if (existingVideos.length >= 3) {
-        const oldestVideo = existingVideos[0];
-        const oldFilePath = path.join(__dirname, '..', oldestVideo.videoPath);
-
-        const deleted = deleteFileIfExists(oldFilePath);
-        if (!deleted) {
-          return res.status(500).json({
-            message: 'Failed to delete old video from server'
-          });
-        }
-
-        await Video.findByIdAndDelete(oldestVideo._id);
-      }
-
-     
-      // 3. Compress video
+      // 1️⃣ Compress uploaded video FIRST
       const compressedPath = await compressVideo(req.file.path);
 
-      // 4. Save compressed video info in DB
+      // 2️⃣ Remove original uploaded file (important cleanup)
+      deleteFileIfExists(req.file.path);
+
+      // 3️⃣ Save compressed video info in DB
       const newVideo = await Video.create({
         user: userId,
         videoPath: compressedPath,
@@ -66,6 +51,21 @@ router.post(
         size: req.file.size
       });
 
+      // 4️⃣ Fetch all user videos (oldest first)
+      const userVideos = await Video.find({ user: userId })
+        .sort({ createdAt: 1 });
+
+      // 5️⃣ If more than 3 videos, delete oldest ones
+      if (userVideos.length > 3) {
+        const excessCount = userVideos.length - 3;
+        const videosToDelete = userVideos.slice(0, excessCount);
+
+        for (const video of videosToDelete) {
+          const oldFilePath = path.join(__dirname, '..', video.videoPath);
+          deleteFileIfExists(oldFilePath);
+          await Video.findByIdAndDelete(video._id);
+        }
+      }
 
       return res.status(201).json({
         message: 'Video uploaded successfully',
@@ -74,7 +74,9 @@ router.post(
 
     } catch (error) {
       console.error('Video upload error:', error);
-      return res.status(500).json({ message: 'Video upload failed' });
+      return res.status(500).json({
+        message: 'Video upload failed'
+      });
     }
   }
 );
@@ -120,13 +122,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     const filePath = path.join(__dirname, '..', video.videoPath);
-    const deleted = deleteFileIfExists(filePath);
-
-    if (!deleted) {
-      return res.status(500).json({
-        message: 'Failed to delete video from server'
-      });
-    }
+    deleteFileIfExists(filePath);
 
     await Video.findByIdAndDelete(video._id);
 
