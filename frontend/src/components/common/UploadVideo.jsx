@@ -1,11 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
-
-console.error('🔥 AZURE BUILD TEST – THIS MUST SHOW 🔥');
-
-const API = 'https://walavideo-backend.azurewebsites.net';
+import api from '../../services/api';
 
 const UploadVideo = () => {
+  const API = "https://walavideo-backend.azurewebsites.net";
   const [video, setVideo] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,27 +10,19 @@ const UploadVideo = () => {
 
   const token = localStorage.getItem('token');
 
-  // ✅ FIX: wrap in useCallback
   const fetchVideos = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/videos/my-videos`, {
+      const res = await api.get('/videos/my-videos', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log('VIDEOS RESPONSE:', res.data);
       setVideos(res.data.videos);
     } catch (err) {
-      console.error(
-        'FETCH VIDEOS ERROR:',
-        err.response?.status,
-        err.response?.data
-      );
+      console.error('FETCH VIDEOS ERROR', err);
     }
   }, [token]);
 
-  // ✅ FIX: add dependency
   useEffect(() => {
     fetchVideos();
   }, [fetchVideos]);
@@ -51,7 +40,7 @@ const UploadVideo = () => {
       setLoading(true);
       setMessage('');
 
-      await axios.post(`${API}/videos/upload`, formData, {
+      await api.post('/videos/upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -62,7 +51,7 @@ const UploadVideo = () => {
       setVideo(null);
       fetchVideos();
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Upload failed');
+      setMessage('Upload failed');
     } finally {
       setLoading(false);
     }
@@ -70,7 +59,7 @@ const UploadVideo = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API}/videos/${id}`, {
+      await api.delete(`/videos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -82,11 +71,7 @@ const UploadVideo = () => {
   };
 
   return (
-    <div>
-      <h3 style={{ color: 'red', fontSize: '24px' }}>
-        UPLOAD VIDEO FROM COMMON COMPONENT
-      </h3>
-
+    <div style={{ maxWidth: "900px", margin: "20px auto" }}>
       <input
         type="file"
         accept="video/*"
@@ -108,8 +93,16 @@ const UploadVideo = () => {
       {videos.length === 0 && <p>No videos uploaded</p>}
 
       {videos.map((v) => (
-        <div key={v._id} style={{ marginBottom: '15px' }}>
-          <video width="300" controls>
+        <div
+          key={v._id}
+          style={{
+            marginBottom: '30px',
+            padding: '10px',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+          }}
+        >
+          <video width="100%" controls>
             <source src={`${API}/${v.videoPath}`} type="video/mp4" />
           </video>
           <br />
