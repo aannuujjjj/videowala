@@ -43,6 +43,10 @@ export default function DashboardLayout() {
         {/* Push content below header */}
         <Toolbar />
 
+        {/* PAGE TITLE */}
+        <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+          Dashboard
+        </Typography>
 
         {/* ROUTED PAGE WILL RENDER BELOW */}
         <Outlet />

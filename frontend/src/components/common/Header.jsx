@@ -20,6 +20,7 @@ export default function Header({ onMenuClick, drawerWidth }) {
       }}
     >
       <Toolbar>
+        {/* Mobile menu button */}
         <IconButton
           color="inherit"
           edge="start"
@@ -29,15 +30,19 @@ export default function Header({ onMenuClick, drawerWidth }) {
           <MenuIcon />
         </IconButton>
 
+        {/* App title */}
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           VideoHub
         </Typography>
 
-        <IconButton color="inherit">
-          <NotificationsIcon />
-        </IconButton>
+        {/* Right side actions */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <IconButton color="inherit">
+            <NotificationsIcon />
+          </IconButton>
 
-        <Avatar sx={{ ml: 2 }} />
+          <Avatar />
+        </Box>
       </Toolbar>
     </AppBar>
   );
