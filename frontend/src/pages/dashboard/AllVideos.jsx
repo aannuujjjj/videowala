@@ -12,7 +12,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import VideoCard from "../../components/common/VideoCard";
 import api from "../../services/api";
 
@@ -36,16 +36,14 @@ export default function AllVideos() {
   });
 
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    fetchVideos(page);
-  }, [page]);
-
-  const fetchVideos = async (pageNo) => {
+ const fetchVideos = useCallback(
+  async (pageNo) => {
     try {
       setLoading(true);
       const res = await api.get(`/videos/all?page=${pageNo}&limit=9`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       setVideos(res.data.videos || []);
@@ -60,7 +58,15 @@ export default function AllVideos() {
     } finally {
       setLoading(false);
     }
-  };
+  },
+  [token] // dependencies used inside
+);
+  useEffect(() => {
+    fetchVideos(page);
+  }, [page, fetchVideos]);
+
+ 
+
 
   // Open delete dialog
   const handleDeleteClick = (videoId) => {

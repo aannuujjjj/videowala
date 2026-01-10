@@ -12,7 +12,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../../services/api";
 
 export default function Profile() {
@@ -38,23 +38,25 @@ export default function Profile() {
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const res = await api.get("/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setUser(res.data.user);
       setPreview(res.data.user.avatar || "");
     } catch (err) {
       console.error("Fetch profile failed:", err);
       showSnackbar("Failed to load profile", "error");
     }
-  };
+  }, [token]); // only dependency used inside
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });

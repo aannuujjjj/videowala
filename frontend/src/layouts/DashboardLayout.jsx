@@ -1,4 +1,4 @@
-import { Box, CssBaseline, Toolbar, Typography } from "@mui/material";
+import { Box, CssBaseline, Toolbar } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import Header from "../components/common/Header";

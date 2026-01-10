@@ -10,24 +10,28 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import MyVideos from "./pages/dashboard/MyVideos";
 import Profile from "./pages/dashboard/Profile";
 import AllVideos from "./pages/dashboard/AllVideos";
+import ProtectedRoute from "./components/common/ProtectedRoutes";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth Routes */}
+        {/* Public Auth Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="my-videos" element={<MyVideos />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="all-videos" element={<AllVideos />} />
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="my-videos" element={<MyVideos />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="all-videos" element={<AllVideos />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
