@@ -2,13 +2,14 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
-    // username for local signup
+    // username (PRIMARY IDENTITY)
     username: {
       type: String,
       required: function () {
         return this.authProvider === 'local';
       },
       trim: true,
+      unique: true,
     },
 
     email: {
@@ -25,7 +26,6 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    // date of birth (age derived from this)
     dob: {
       type: Date,
       required: function () {
@@ -33,33 +33,39 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    // auth type
     authProvider: {
       type: String,
       enum: ['local', 'google'],
       default: 'local',
     },
 
-    // google-specific
     googleId: {
       type: String,
       default: null,
     },
 
-    // reset password
-    resetPasswordToken: {
+    // 🔹 PROFILE FIELDS
+    bio: {
       type: String,
+      maxlength: 300,
+      default: '',
     },
-    resetPasswordExpiry: {
-      type: Date,
+
+    avatar: {
+      type: String,
+      default: '',
     },
-    resetOtp: {
-    type: String,
+
+    phone: {
+      type: String,
+      default: '',
     },
-    resetOtpExpiry: {
-    type: Date,
-    },
-    
+
+    // reset password
+    resetPasswordToken: String,
+    resetPasswordExpiry: Date,
+    resetOtp: String,
+    resetOtpExpiry: Date,
   },
   { timestamps: true }
 );

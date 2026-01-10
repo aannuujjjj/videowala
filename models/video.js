@@ -6,6 +6,18 @@ const videoSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  title: {
+    type: String,
+    trim: true,
+    maxlength: 150,
+    default: '',
+  },
+  description: {
+    type: String,
+    trim: true,
+    maxlength: 1000,
+    default: '',
+  },
   videoPath: {
     type: String,
     required: true

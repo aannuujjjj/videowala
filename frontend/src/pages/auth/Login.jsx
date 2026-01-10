@@ -15,7 +15,7 @@ import AuthButton from '../../components/common/AuthButton';
 import GoogleButton from '../../components/common/GoogleButton';
 import { loginUser, googleLogin } from '../../services/authService';
 
-import Logo from '../../assets/Logo.png'; // 👈 ADD LOGO
+import Logo from '../../assets/Logo.png';
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -32,9 +32,8 @@ const Login = () => {
       const data = await googleLogin({
         token: credentialResponse.credential,
       });
-
       localStorage.setItem('token', data.token);
-      navigate('/dashboard');
+      navigate('/dashboard/all-videos');
     } catch {
       setError('Google login failed');
     }
@@ -51,7 +50,7 @@ const Login = () => {
     try {
       const data = await loginUser(form);
       localStorage.setItem('token', data.token);
-      navigate('/dashboard');
+      navigate('/dashboard/all-videos');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
@@ -60,90 +59,59 @@ const Login = () => {
   };
 
   return (
-    <Box minHeight="100vh" display="flex">
-      {/* LEFT BRAND SECTION */}
+    <Box minHeight="100vh" display="flex" bgcolor="#fff">
+      {/* LEFT BRAND (X STYLE) */}
       <Box
         flex={1}
         display={{ xs: 'none', md: 'flex' }}
-        flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        sx={{
-          background: 'linear-gradient(135deg, #1976d2, #d32f2f)',
-          color: '#fff',
-        }}
       >
-        <Box
-          flex={1}
-          display={{ xs: 'none', md: 'flex' }}
-        >
-          <img
-            src={Logo}
-            alt="Logo"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-        </Box>
-
-
-        {/* <Typography variant="h4" fontWeight="bold">
-          Welcome Back
-        </Typography> */}
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{
+            width: 320,
+            maxWidth: '70%',
+          }}
+        />
       </Box>
 
-      {/* RIGHT LOGIN SECTION */}
-      {/* RIGHT LOGIN SECTION */}
+      {/* RIGHT AUTH SECTION */}
       <Box
         flex={1}
         display="flex"
-        justifyContent="center"
         alignItems="center"
-        bgcolor="#f4f6f8"
+        justifyContent="center"
+        px={3}
       >
-        <Box
-          width={420}
-          bgcolor="#fff"
-          p={4}
-          borderRadius={3}
-          boxShadow="0 10px 40px rgba(0,0,0,0.1)"
-        >
+        <Box width="100%" maxWidth={420}>
           {/* MOBILE LOGO */}
           <Box
             display={{ xs: 'flex', md: 'none' }}
             justifyContent="center"
-            mb={2}
+            mb={4}
           >
-            <img
-              src={Logo}
-              alt="Logo"
-              style={{
-                width: 120,
-                height: 'auto',
-              }}
-            />
+            <img src={Logo} alt="Logo" style={{ width: 90 }} />
           </Box>
 
-          <Typography variant="h4" textAlign="center" mb={1}>
-            Login
+          <Typography variant="h3" fontWeight={700} mb={1}>
+            Login now
           </Typography>
 
-          <Typography
-            variant="body2"
-            textAlign="center"
-            mb={3}
-            color="text.secondary"
-          >
-            Enter your credentials to continue
+          <Typography variant="h6" fontWeight={500} mb={3}>
+            Sign in to continue
           </Typography>
 
           <GoogleButton onSuccess={handleGoogleSuccess} />
 
-          <Divider sx={{ my: 2 }}>or</Divider>
+          <Divider sx={{ my: 3 }}>or</Divider>
 
-          {error && <Alert severity="error">{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
           <AuthInput
             label="Email"
@@ -160,12 +128,17 @@ const Login = () => {
             onChange={handleChange}
           />
 
-          <Box display="flex" justifyContent="space-between" mt={1}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={1}
+          >
             <FormControlLabel
               control={<Checkbox size="small" />}
               label="Remember me"
             />
-            <Link href="/forgot-password" underline="none" color="primary">
+            <Link href="/forgot-password" underline="hover">
               Forgot password?
             </Link>
           </Box>
@@ -174,22 +147,23 @@ const Login = () => {
             onClick={handleLogin}
             disabled={loading}
             sx={{
-              mt: 2,
-              background: 'linear-gradient(90deg, #1976d2, #d32f2f)',
+              mt: 3,
+              borderRadius: 999,
+              fontSize: 16,
+              py: 1.3,
             }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in…' : 'Sign in'}
           </AuthButton>
 
-          <Typography variant="body2" textAlign="center" mt={3}>
+          <Typography variant="body2" mt={4}>
             Don’t have an account?{' '}
-            <Link href="/signup" underline="none" color="primary">
+            <Link href="/signup" fontWeight={500}>
               Create one
             </Link>
           </Typography>
         </Box>
       </Box>
-
     </Box>
   );
 };

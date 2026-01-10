@@ -17,21 +17,9 @@ export default function Sidebar({ drawerWidth, mobileOpen, onClose }) {
   const location = useLocation();
 
   const menuItems = [
-    {
-      text: "All Videos",
-      icon: <FolderIcon />,
-      path: "/dashboard",
-    },
-    {
-      text: "My Videos",
-      icon: <VideoLibraryIcon />,
-      path: "/dashboard/my-videos",
-    },
-    {
-      text: "Profile",
-      icon: <PersonIcon />,
-      path: "/dashboard/profile",
-    },
+    { text: "All Videos", icon: <FolderIcon />, path: "/dashboard/all-videos" },
+    { text: "My Videos", icon: <VideoLibraryIcon />, path: "/dashboard/my-videos" },
+    { text: "Profile", icon: <PersonIcon />, path: "/dashboard/profile" },
   ];
 
   const drawer = (
@@ -51,31 +39,27 @@ export default function Sidebar({ drawerWidth, mobileOpen, onClose }) {
               }}
               sx={{
                 mx: 1,
-                borderRadius: 1,
+                mb: 0.5,
+                borderRadius: 2,
                 "&.Mui-selected": {
-                  bgcolor: "#1f2937",
+                  bgcolor: "primary.dark",
+                  color: "#fff",
                 },
-                "&.Mui-selected:hover": {
-                  bgcolor: "#374151",
+                "&.Mui-selected .MuiListItemIcon-root": {
+                  color: "#fff",
                 },
               }}
             >
               <ListItemIcon
                 sx={{
-                  color: isActive ? "#60a5fa" : "#9ca3af",
                   minWidth: 40,
+                  color: isActive ? "#fff" : "primary.light",
                 }}
               >
                 {item.icon}
               </ListItemIcon>
 
-              <ListItemText
-                primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: 14,
-                  fontWeight: isActive ? 600 : 400,
-                }}
-              />
+              <ListItemText primary={item.text} />
             </ListItemButton>
           );
         })}
@@ -85,17 +69,15 @@ export default function Sidebar({ drawerWidth, mobileOpen, onClose }) {
 
   return (
     <Box component="nav">
-      {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
         onClose={onClose}
-        ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", sm: "none" },
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            bgcolor: "#111827",
+            bgcolor: "primary.main",
             color: "#fff",
           },
         }}
@@ -103,7 +85,6 @@ export default function Sidebar({ drawerWidth, mobileOpen, onClose }) {
         {drawer}
       </Drawer>
 
-      {/* Desktop Drawer */}
       <Drawer
         variant="permanent"
         open
@@ -111,7 +92,7 @@ export default function Sidebar({ drawerWidth, mobileOpen, onClose }) {
           display: { xs: "none", sm: "block" },
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            bgcolor: "#111827",
+            bgcolor: "primary.main",
             color: "#fff",
             borderRight: "none",
           },

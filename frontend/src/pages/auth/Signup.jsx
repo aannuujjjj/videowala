@@ -1,4 +1,11 @@
-import { Box, Typography, Link, Divider, Alert, Snackbar } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Link,
+  Divider,
+  Alert,
+  Snackbar,
+} from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -70,7 +77,6 @@ const Signup = () => {
       setSnackbarMessage('Signup successful. Please login.');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
-
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');
     } finally {
@@ -79,28 +85,40 @@ const Signup = () => {
   };
 
   return (
-    <Box minHeight="100vh" display="flex">
+    <Box minHeight="100vh" display="flex" bgcolor="#fff">
+      {/* LEFT BRAND (X STYLE) */}
       <Box
         flex={1}
         display={{ xs: 'none', md: 'flex' }}
-        sx={{ background: 'linear-gradient(135deg, #1976d2, #d32f2f)' }}
+        justifyContent="center"
+        alignItems="center"
       >
         <img
           src={Logo}
           alt="Logo"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{
+            width: 320,
+            maxWidth: '70%',
+          }}
         />
       </Box>
 
-      <Box flex={1} display="flex" justifyContent="center" alignItems="center" bgcolor="#f4f6f8">
-        {/* ✅ FIXED SNACKBAR */}
+      {/* RIGHT SIGNUP SECTION */}
+      <Box
+        flex={1}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        px={3}
+      >
+        {/* SNACKBAR (UNCHANGED LOGIC) */}
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           onClose={() => {
             setSnackbarOpen(false);
-            navigate('/'); // ✅ navigate AFTER snackbar closes
+            navigate('/');
           }}
         >
           <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
@@ -108,25 +126,56 @@ const Signup = () => {
           </Alert>
         </Snackbar>
 
-        <Box
-          width={420}
-          bgcolor="#fff"
-          p={4}
-          borderRadius={3}
-          boxShadow="0 10px 40px rgba(0,0,0,0.1)"
-        >
-          <Typography variant="h4" textAlign="center" mb={1}>
-            Create Account
+        <Box width="100%" maxWidth={420}>
+          {/* MOBILE LOGO */}
+          <Box
+            display={{ xs: 'flex', md: 'none' }}
+            justifyContent="center"
+            mb={4}
+          >
+            <img src={Logo} alt="Logo" style={{ width: 90 }} />
+          </Box>
+
+          <Typography variant="h3" fontWeight={700} mb={1}>
+            Join today
+          </Typography>
+
+          <Typography variant="h6" fontWeight={500} mb={3}>
+            Create your account
           </Typography>
 
           <GoogleButton />
+
           <Divider sx={{ my: 2 }}>or</Divider>
 
-          {error && <Alert severity="error">{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-          <AuthInput label="Username" name="username" value={form.username} onChange={handleChange} />
-          <AuthInput label="Email" name="email" value={form.email} onChange={handleChange} />
-          <AuthInput label="Password" type="password" name="password" value={form.password} onChange={handleChange} />
+          <AuthInput
+            label="Username"
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+          />
+
+          <AuthInput
+            label="Email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <AuthInput
+            label="Password"
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+          />
+
           <AuthInput
             label="Confirm Password"
             type="password"
@@ -140,22 +189,32 @@ const Signup = () => {
               label="Date of Birth"
               value={form.dob}
               onChange={(newValue) => setForm({ ...form, dob: newValue })}
-              slotProps={{ textField: { fullWidth: true, margin: 'normal' } }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: 'normal',
+                },
+              }}
             />
           </LocalizationProvider>
 
           <AuthButton
             onClick={handleSubmit}
             disabled={loading}
-            sx={{ mt: 2, background: 'linear-gradient(90deg, #1976d2, #d32f2f)' }}
+            sx={{
+              mt: 3,
+              borderRadius: 999,
+              py: 1.3,
+              fontSize: 16,
+            }}
           >
-            {loading ? 'Creating...' : 'Create Account'}
+            {loading ? 'Creating…' : 'Create account'}
           </AuthButton>
 
-          <Typography variant="body2" textAlign="center" mt={3}>
+          <Typography variant="body2" mt={2}>
             Already have an account?{' '}
-            <Link href="/" underline="none">
-              Login
+            <Link href="/" fontWeight={500}>
+              Sign in
             </Link>
           </Typography>
         </Box>

@@ -8,6 +8,8 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import MyVideos from "./pages/dashboard/MyVideos";
+import Profile from "./pages/dashboard/Profile";
+import AllVideos from "./pages/dashboard/AllVideos";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="my-videos" element={<MyVideos />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="all-videos" element={<AllVideos />} />
         </Route>
       </Routes>
     </BrowserRouter>

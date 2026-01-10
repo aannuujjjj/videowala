@@ -1,26 +1,40 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2', // Blue
+      main: "#004066",   // Brand Blue
+      dark: "#00324f",
+      light: "#336b8a",
+      contrastText: "#ffffff",
     },
     secondary: {
-      main: '#d32f2f', // Red
+      main: "#cb181b",   // Brand Red
+      dark: "#a01315",
+      light: "#e04b4f",
+      contrastText: "#ffffff",
     },
     background: {
-      default: '#f5f7fb',
+      default: "#f4f6f8",
+      paper: "#ffffff",
     },
-  },
-  typography: {
-    fontFamily: 'Inter, Roboto, Arial',
-    button: {
-      textTransform: 'none',
-      fontWeight: 600,
+    text: {
+      primary: "#0f172a",
+      secondary: "#475569",
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
+  },
+  typography: {
+    fontFamily: `"Inter", "Roboto", "Helvetica", "Arial", sans-serif`,
+    h6: {
+      fontWeight: 600,
+    },
+    button: {
+      textTransform: "none",
+      fontWeight: 600,
+    },
   },
 });
 

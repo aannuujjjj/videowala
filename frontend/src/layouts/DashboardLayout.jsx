@@ -1,4 +1,4 @@
-import { Box, CssBaseline, Toolbar, Typography } from "@mui/material";
+import { Box, CssBaseline, Toolbar } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import Header from "../components/common/Header";
@@ -9,25 +9,19 @@ const drawerWidth = 240;
 export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen((prev) => !prev);
-  };
-
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
 
-      {/* HEADER */}
       <Header
         drawerWidth={drawerWidth}
-        onMenuClick={handleDrawerToggle}
+        onMenuClick={() => setMobileOpen(!mobileOpen)}
       />
 
-      {/* SIDEBAR */}
       <Sidebar
         drawerWidth={drawerWidth}
         mobileOpen={mobileOpen}
-        onClose={handleDrawerToggle}
+        onClose={() => setMobileOpen(false)}
       />
 
       {/* MAIN CONTENT */}
@@ -36,8 +30,9 @@ export default function DashboardLayout() {
         sx={{
           flexGrow: 1,
           p: 3,
-          bgcolor: "#f5f6fa",
           minHeight: "100vh",
+          bgcolor: "background.default",
+          ml: { sm: `${drawerWidth}px` }, // ✅ KEY FIX
         }}
       >
         {/* Push content below header */}

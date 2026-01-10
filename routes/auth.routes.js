@@ -64,8 +64,6 @@ router.post('/google-login', async (req, res) => {
 /* ======================================================
    REGISTER
 ====================================================== */
-
-
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password, dob } = req.body;
@@ -110,7 +108,6 @@ router.post('/register', async (req, res) => {
 /* ======================================================
    LOGIN
 ====================================================== */
-
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -147,7 +144,6 @@ router.post('/login', async (req, res) => {
 /* ======================================================
    FORGOT PASSWORD
 ====================================================== */
-
 router.post('/forgot-password', async (req, res) => {
   try {
     console.log('🔥 /forgot-password HIT');
@@ -204,7 +200,6 @@ router.post('/forgot-password', async (req, res) => {
 /* ======================================================
    RESET PASSWORD
 ====================================================== */
-
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, newPassword } = req.body;
@@ -245,10 +240,10 @@ router.post('/reset-password', async (req, res) => {
     });
   }
 });
+
 /* ======================================================
    VERIFY OTP
 ====================================================== */
-
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -280,18 +275,6 @@ router.post('/verify-otp', async (req, res) => {
       message: 'Server error',
     });
   }
-});
-
-
-/* ======================================================
-   PROTECTED PROFILE
-====================================================== */
-
-router.get('/profile', authMiddleware, (req, res) => {
-  res.status(200).json({
-    message: 'Protected route accessed',
-    user: req.user,
-  });
 });
 
 module.exports = router;

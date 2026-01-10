@@ -1,15 +1,18 @@
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Button,
-    TextField,
-    Typography,
-    Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  IconButton,
+  Box,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 const OtpDialog = ({
-    open,
+  open,
   otp,
   setOtp,
   loading,
@@ -19,72 +22,102 @@ const OtpDialog = ({
   canResend,
   resendTimer,
   onResend,
+  onClose, // ✅ ADD THIS
 }) => {
-    return (
-        <Dialog open={open}>
-            <DialogTitle>Verify OTP</DialogTitle>
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose} // ✅ IMPORTANT
+      maxWidth="xs"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          p: 1,
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1,
+        }}
+      >
+        <Typography variant="h6" fontWeight={600}>
+          Verify OTP
+        </Typography>
 
-            <DialogContent>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    An OTP has been sent to your registered email address.
-                </Typography>
+        <IconButton
+          size="small"
+          onClick={onClose} // ✅ CLOSE DIALOG
+          aria-label="close"
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-                {/* ❌ ERROR MESSAGE */}
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+      <DialogContent>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Enter the 6-digit OTP sent to your registered email address.
+        </Typography>
 
-                <TextField
-                    label="OTP"
-                    fullWidth
-                    margin="normal"
-                    value={otp}
-                    placeholder="Enter 6-digit OTP"
-                    inputProps={{
-                        maxLength: 6,
-                        inputMode: 'numeric',
-                        pattern: '[0-9]*',
-                    }}
-                    onChange={(e) => {
-                        const value = e.target.value;
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-                        // allow only digits
-                        if (/^\d*$/.test(value)) {
-                            setOtp(value);
-                            clearError(); // clear error while typing
-                        }
-                    }}
-                />
+        <TextField
+          fullWidth
+          value={otp}
+          placeholder="● ● ● ● ● ●"
+          inputProps={{
+            maxLength: 6,
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+            style: {
+              textAlign: 'center',
+              letterSpacing: '0.4em',
+              fontSize: 20,
+              fontWeight: 600,
+            },
+          }}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (/^\d*$/.test(value)) {
+              setOtp(value);
+              clearError();
+            }
+          }}
+        />
 
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{ mt: 3, borderRadius: 999, py: 1.2 }}
+          onClick={onVerify}
+          disabled={loading}
+        >
+          {loading ? 'Verifying…' : 'Verify OTP'}
+        </Button>
 
-                <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                    onClick={onVerify}
-                    disabled={loading}
-                >
-                    {loading ? 'Verifying...' : 'Verify OTP'}
-                </Button>
-                <Typography
-                    variant="body2"
-                    align="center"
-                    sx={{ mt: 2, color: 'text.secondary' }}
-                >
-                    {canResend ? (
-                        <Button variant="text" onClick={onResend}>
-                            Resend OTP
-                        </Button>
-                    ) : (
-                        `Resend OTP in ${resendTimer}s`
-                    )}
-                </Typography>
-
-            </DialogContent>
-        </Dialog>
-    );
+        <Box mt={2} textAlign="center">
+          {canResend ? (
+            <Button variant="text" onClick={onResend}>
+              Resend OTP
+            </Button>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Resend OTP in {resendTimer}s
+            </Typography>
+          )}
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
 };
+
 
 export default OtpDialog;
