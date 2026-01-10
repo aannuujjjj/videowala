@@ -106,7 +106,7 @@ router.get('/all', authMiddleware, async (req, res) => {
 
     const formattedVideos = videos.map(video => ({
       ...video.toObject(),
-      url: `${process.env.BACKEND_URL}/${video.videoPath}`,
+      url: `https://walavideo-backend.azurewebsites.net/${video.videoPath}`,
     }));
 
     return res.status(200).json({

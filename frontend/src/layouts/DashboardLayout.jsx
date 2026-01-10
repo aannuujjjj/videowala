@@ -1,4 +1,4 @@
-import { Box, CssBaseline, Toolbar } from "@mui/material";
+import { Box, CssBaseline, Toolbar, Typography } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import Header from "../components/common/Header";
@@ -37,11 +37,6 @@ export default function DashboardLayout() {
       >
         {/* Push content below header */}
         <Toolbar />
-
-        {/* PAGE TITLE */}
-        <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-          Dashboard
-        </Typography>
 
         {/* ROUTED PAGE WILL RENDER BELOW */}
         <Outlet />

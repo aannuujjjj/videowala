@@ -3,6 +3,7 @@ import {
   Toolbar,
   IconButton,
   Typography,
+  
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
@@ -33,13 +34,13 @@ export default function Header({ onMenuClick, drawerWidth }) {
         </Typography>
 
         {/* Right side actions */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        {/* <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton color="inherit">
             <NotificationsIcon />
           </IconButton>
 
           <Avatar />
-        </Box>
+        </Box> */}
       </Toolbar>
     </AppBar>
   );
