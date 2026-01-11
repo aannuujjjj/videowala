@@ -1,7 +1,6 @@
 import {
   Box,
   Typography,
-  Grid,
   Pagination,
   CircularProgress,
   Dialog,
@@ -36,43 +35,36 @@ export default function AllVideos() {
   });
 
   const token = localStorage.getItem("token");
- const fetchVideos = useCallback(
-  async (pageNo) => {
-    try {
-      setLoading(true);
-      const res = await api.get(`/videos/all?page=${pageNo}&limit=9`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const fetchVideos = useCallback(
+    async (pageNo) => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/videos/all?page=${pageNo}&limit=9`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      setVideos(res.data.videos || []);
-      setTotalPages(res.data.totalPages || 1);
-    } catch (error) {
-      console.error("Failed to fetch all videos", error);
-      setSnackbar({
-        open: true,
-        message: "Failed to load videos",
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  },
-  [token] // dependencies used inside
-);
+        setVideos(res.data.videos || []);
+        setTotalPages(res.data.totalPages || 1);
+      } catch (error) {
+        console.error("Failed to fetch all videos", error);
+        setSnackbar({
+          open: true,
+          message: "Failed to load videos",
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token] // dependencies used inside
+  );
   useEffect(() => {
     fetchVideos(page);
   }, [page, fetchVideos]);
 
- 
 
-
-  // Open delete dialog
-  const handleDeleteClick = (videoId) => {
-    setSelectedVideoId(videoId);
-    setDeleteDialogOpen(true);
-  };
 
   // Confirm delete
   const handleConfirmDelete = async () => {
@@ -106,7 +98,7 @@ export default function AllVideos() {
   return (
     <Box sx={{ width: "100%", px: { xs: 1.5, sm: 2, md: 3 }, pb: 3 }}>
       <Typography
-        variant="h5"
+        variant="h4"
         fontWeight={600}
         mb={3}
         textAlign={{ xs: "center", sm: "left" }}
@@ -132,17 +124,27 @@ export default function AllVideos() {
 
       {/* Videos Grid */}
       {!loading && videos.length > 0 && (
-        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              md: "1fr 1fr 1fr", // ✅ Always 3 per row
+            },
+            gap: 3,
+          }}
+        >
           {videos.map((video) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={video._id}>
-              <VideoCard
-                video={video}
-                apiBase={API_BASE}
-                onDelete={() => handleDeleteClick(video._id)}
-              />
-            </Grid>
+            <VideoCard
+              key={video._id}
+              video={video}
+              apiBase={API_BASE}
+               readOnly={true}   // 👈 hide edit + delete
+            />
           ))}
-        </Grid>
+        </Box>
+
       )}
 
       {/* Pagination */}

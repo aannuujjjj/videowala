@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Grid } from "@mui/material";
+import { Box, Typography, Button,  Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState, useCallback } from "react";
 import UploadVideoDialog from "../../components/common/UploadVideoDialog";
@@ -11,6 +11,17 @@ export default function MyVideos() {
   const [open, setOpen] = useState(false);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
+
+  // Snackbar
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const token = localStorage.getItem("token");
 
@@ -35,14 +46,36 @@ export default function MyVideos() {
     fetchVideos();
   }, [fetchVideos]);
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (videoId) => {
+    setSelectedVideoId(videoId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await api.delete(`/videos/${id}`, {
+      await api.delete(`/videos/${selectedVideoId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchVideos();
-    } catch (err) {
-      console.error("Delete failed:", err);
+
+      setVideos((prev) =>
+        prev.filter((v) => v._id !== selectedVideoId)
+      );
+
+      setSnackbar({
+        open: true,
+        message: "Video deleted successfully",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Delete failed", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to delete video",
+        severity: "error",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedVideoId(null);
     }
   };
 
@@ -53,9 +86,9 @@ export default function MyVideos() {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        mb={3}
+        sx={{ width: "100%", px: { xs: 1.5, sm: 2, md: 3 }, pb: 3 }}
       >
-        <Typography variant="h5" fontWeight={600}>
+        <Typography variant="h4" fontWeight={600}>
           My Videos
         </Typography>
 
@@ -94,17 +127,27 @@ export default function MyVideos() {
       )}
 
       {/* Video Grid */}
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "1fr 1fr",
+            md: "1fr 1fr 1fr", // ✅ Always 3 per row
+          },
+          gap: 3,
+        }}
+      >
         {videos.map((video) => (
-          <Grid item xs={12} sm={6} md={4} key={video._id}>
-            <VideoCard
-              video={video}
-              apiBase={API}
-              onDelete={handleDelete}
-            />
-          </Grid>
+          <VideoCard
+            key={video._id}
+            video={video}
+            apiBase={API}
+            onDelete={handleDeleteClick}
+          />
         ))}
-      </Grid>
+      </Box>
+
 
       {/* Upload Dialog */}
       <UploadVideoDialog
@@ -112,6 +155,41 @@ export default function MyVideos() {
         onClose={() => setOpen(false)}
         onUploaded={fetchVideos}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Video</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this video?
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

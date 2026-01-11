@@ -3,11 +3,23 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  
+  Button,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useNavigate } from "react-router-dom";
 
 export default function Header({ onMenuClick, drawerWidth }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove auth token
+    localStorage.removeItem("token");
+
+    // Redirect to login
+    navigate("/login");
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -33,14 +45,14 @@ export default function Header({ onMenuClick, drawerWidth }) {
           VideoWala
         </Typography>
 
-        {/* Right side actions */}
-        {/* <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <IconButton color="inherit">
-            <NotificationsIcon />
-          </IconButton>
-
-          <Avatar />
-        </Box> */}
+        {/* Logout Button */}
+        <Button
+          color="inherit"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
       </Toolbar>
     </AppBar>
   );
