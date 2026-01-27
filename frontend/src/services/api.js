@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Vite environment variable (WORKS locally + production)
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL  || "https://walavideo-backend.azurewebsites.net";
 
 if (!API_URL) {
   throw new Error(
