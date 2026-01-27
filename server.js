@@ -9,6 +9,9 @@ const { exec } = require('child_process'); // ✅ for ffmpeg test
 const authRoutes = require('./routes/auth.routes');
 const videoRoutes = require('./routes/video.routes');
 const userRoutes = require('./routes/user.routes');
+const contactRoutes = require('./routes/contact.routes');
+
+
 
 
 const app = express();
@@ -57,6 +60,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/auth', authRoutes);
 app.use('/videos', videoRoutes);
 app.use('/users', userRoutes)
+app.use('/api/contact', contactRoutes);
+
 
 
 

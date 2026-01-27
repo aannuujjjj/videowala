@@ -156,12 +156,20 @@ const Login = () => {
             {loading ? 'Logging in…' : 'Sign in'}
           </AuthButton>
 
-          <Typography variant="body2" mt={4}>
+          <Typography variant="body2" mt={4} align="center">
             Don’t have an account?{' '}
             <Link href="/signup" fontWeight={500}>
               Create one
             </Link>
           </Typography>
+
+          <Typography variant="body2" mt={1} align="center">
+            <Link href="/contact" fontWeight={500}>
+              Contact Us
+            </Link>
+          </Typography>
+
+
         </Box>
       </Box>
     </Box>
