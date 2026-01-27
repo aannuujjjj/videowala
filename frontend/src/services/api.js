@@ -1,19 +1,22 @@
 import axios from "axios";
 
-// Vite environment variable (WORKS locally + production)
-const API_URL = process.env.REACT_APP_API_URL  || "https://walavideo-backend.azurewebsites.net";
+// CRA-safe API base URL
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  "https://walavideo-backend.azurewebsites.net";
 
-if (!API_URL) {
-  throw new Error(
-    "REACT_APP_API_URL is not defined. Check your .env file or Azure Static Web App configuration."
-  );
-}
-
+// Create axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, // prevents hanging requests
 });
+
+// Optional: log once in dev (helps debugging, never crashes app)
+if (process.env.NODE_ENV === "development") {
+  console.log("API base URL:", API_URL);
+}
 
 export default api;

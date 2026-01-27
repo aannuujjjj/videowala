@@ -1,18 +1,26 @@
 console.log("CONTACT ROUTE FILE LOADED");
 
 const express = require("express");
-const { sendContactMail } = require("../frontend/src/services/mail.service");
+const { sendContactMail } = require("../services/mail.service");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
+    console.log("CONTACT API HIT", req.body);
+
     const { name, email, phone, country, message } = req.body;
 
     if (!name || !email || !message) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    await sendContactMail({ name, email, phone, country, message });
+    await sendContactMail({
+      name,
+      email,
+      phone,
+      country,
+      message,
+    });
 
     return res.status(200).json({ message: "Contact received" });
   } catch (error) {
