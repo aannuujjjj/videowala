@@ -27,6 +27,7 @@ export default function Contact() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   };
 
   const handlePhoneChange = (value) => {
@@ -49,6 +50,7 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus("idle");
 
     if (!form.name || !form.email || !form.phone || !form.message) {
       setErrorMsg("All fields are required.");
@@ -75,7 +77,10 @@ export default function Contact() {
 
     try {
       await api.post("/api/contact", form);
+
+      setErrors({});
       setStatus("success");
+
       setForm({
         name: "",
         email: "",
@@ -92,29 +97,16 @@ export default function Contact() {
 
   return (
     <Box minHeight="100vh" display="flex" bgcolor="#fff">
-      
-      {/* LEFT BRAND SECTION (LIKE LOGIN PAGE) */}
       <Box
         flex={1}
         display={{ xs: "none", md: "flex" }}
         justifyContent="center"
         alignItems="center"
       >
-        <img
-          src={Logo}
-          alt="Logo"
-          style={{ width: 320, maxWidth: "70%" }}
-        />
+        <img src={Logo} alt="Logo" style={{ width: 320, maxWidth: "70%" }} />
       </Box>
 
-      {/* RIGHT CONTACT FORM SECTION */}
-      <Box
-        flex={1}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        px={3}
-      >
+      <Box flex={1} display="flex" alignItems="center" justifyContent="center" px={3}>
         <Box
           component="form"
           onSubmit={handleSubmit}
