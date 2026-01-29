@@ -9,7 +9,7 @@ import theme from './theme/theme';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <GoogleOAuthProvider clientId="528217628474-f367o4v1qhed2oi2a7njfocl1aq96nn3.apps.googleusercontent.com">
+  <GoogleOAuthProvider clientId="208938204355-hd7ita6a8jchcpbf6jesttgs197m44h9.apps.googleusercontent.com">
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <App />
