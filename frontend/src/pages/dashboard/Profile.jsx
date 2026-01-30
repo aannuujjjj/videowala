@@ -32,7 +32,17 @@ export default function Profile() {
 
   const [preview, setPreview] = useState("");
 
-  // Snackbar state
+  // BANK STATES
+  const [isEditingBank, setIsEditingBank] = useState(false);
+  const [bankStatus, setBankStatus] = useState("NON_VERIFIED");
+  const [bankAccount, setBankAccount] = useState({
+    accountHolderName: "",
+    bankName: "",
+    branchAddress: "",
+    ifsc: "",
+    status: "NON_VERIFIED",
+  });
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -45,23 +55,39 @@ export default function Profile() {
     setSnackbar({ open: true, message, severity });
   };
 
+  // FETCH PROFILE
   const fetchProfile = useCallback(async () => {
     try {
       const res = await api.get("/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setUser(res.data.user);
       setPreview(res.data.user.avatar || "");
-    } catch (err) {
-      console.error("Fetch profile failed:", err);
+    } catch {
       showSnackbar("Failed to load profile", "error");
+    }
+  }, [token]);
+
+  // FETCH BANK ACCOUNT ✅ FIXED PATH
+  const fetchBankAccount = useCallback(async () => {
+    try {
+      const res = await api.get("/api/bank-accounts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data.bankAccount) {
+        setBankAccount(res.data.bankAccount);
+        setBankStatus(res.data.bankAccount.status);
+      }
+    } catch (err) {
+      console.error("Fetch bank account failed", err);
     }
   }, [token]);
 
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+    fetchBankAccount();
+  }, [fetchProfile, fetchBankAccount]);
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -70,37 +96,52 @@ export default function Profile() {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setPreview(URL.createObjectURL(file));
-    showSnackbar("Profile photo selected (not uploaded yet)", "info");
   };
 
   const handleUpdate = async () => {
     try {
       await api.put(
         "/users/profile",
+        { bio: user.bio, phone: user.phone },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      showSnackbar("Profile updated successfully");
+    } catch {
+      showSnackbar("Failed to update profile", "error");
+    }
+  };
+
+  // BANK SUBMIT ✅ FIXED PATH
+  const handleBankSubmit = async () => {
+    try {
+      await api.put(
+        "/api/bank-accounts",
         {
-          bio: user.bio,
-          phone: user.phone,
+          accountHolderName: bankAccount.accountHolderName,
+          bankName: bankAccount.bankName,
+          branchAddress: bankAccount.branchAddress,
+          ifsc: bankAccount.ifsc,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      showSnackbar("Profile updated successfully", "success");
+      showSnackbar("Bank account saved successfully");
+      setIsEditingBank(false);
+      fetchBankAccount();
     } catch (err) {
-      console.error("Profile update failed:", err);
-      showSnackbar("Failed to update profile", "error");
+      console.error("Bank submit failed", err);
+      showSnackbar("Failed to save bank details", "error");
     }
   };
 
   return (
     <>
       <Box sx={{ width: "100%", px: { xs: 1.5, sm: 2, md: 3 }, pb: 3 }}>
-        {/* Header Section */}
         <Box mb={4}>
-          <Typography variant="h4" fontWeight={700} color="text.primary" mb={1}>
+          <Typography variant="h4" fontWeight={700} mb={1}>
             My Profile
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -109,327 +150,189 @@ export default function Profile() {
         </Box>
 
         <Grid container spacing={3}>
-          {/* LEFT COLUMN - Profile Card */}
+          {/* LEFT COLUMN */}
           <Grid item xs={12} md={4}>
-            <Card 
-              elevation={0}
-              sx={{ 
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'divider',
-                height: '100%'
-              }}
-            >
+            <Card elevation={0} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
               <CardContent sx={{ p: 4 }}>
                 <Stack spacing={3} alignItems="center">
                   <Box position="relative">
-                    <Avatar
-                      src={preview}
-                      sx={{
-                        width: 140,
-                        height: 140,
-                        bgcolor: "primary.main",
-                        fontSize: 48,
-                        fontWeight: 600,
-                        border: '4px solid',
-                        borderColor: 'background.default',
-                        boxShadow: '0 4px 20px rgba(0,64,102,0.15)',
-                      }}
-                    >
+                    <Avatar src={preview} sx={{ width: 140, height: 140, fontSize: 48 }}>
                       {user.username?.charAt(0)?.toUpperCase()}
                     </Avatar>
-                    
                     <Box
                       component="label"
                       sx={{
-                        position: 'absolute',
+                        position: "absolute",
                         bottom: 0,
                         right: 0,
-                        bgcolor: 'primary.main',
-                        borderRadius: '50%',
+                        bgcolor: "primary.main",
+                        borderRadius: "50%",
                         width: 40,
                         height: 40,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: 2,
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          bgcolor: 'primary.dark',
-                          transform: 'scale(1.05)',
-                        },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
                       }}
                     >
-                      <EditIcon sx={{ color: 'white', fontSize: 20 }} />
-                      <input
-                        hidden
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                      />
+                      <EditIcon sx={{ color: "white" }} />
+                      <input hidden type="file" onChange={handleAvatarChange} />
                     </Box>
                   </Box>
 
-                  <Box textAlign="center" width="100%">
-                    <Typography variant="h6" fontWeight={700} mb={0.5}>
-                      {user.username || "User"}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" mb={2}>
-                      {user.email}
-                    </Typography>
-                    <Chip 
-                      label="Active Account" 
-                      size="small" 
-                      sx={{ 
-                        bgcolor: 'success.light',
-                        color: 'success.dark',
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Box>
+                  <Typography variant="h6" fontWeight={700}>
+                    {user.username}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {user.email}
+                  </Typography>
 
-                  <Divider sx={{ width: '100%' }} />
+                  <Chip label="Active Account" color="success" size="small" />
+
+                  <Divider sx={{ width: "100%" }} />
 
                   <Stack spacing={2} width="100%">
-                    <Paper 
-                      elevation={0} 
-                      sx={{ 
-                        p: 2, 
-                        bgcolor: 'background.default',
-                        borderRadius: 2,
-                      }}
-                    >
-                      <Stack direction="row" spacing={1.5} alignItems="center">
-                        <PersonIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Username
-                          </Typography>
-                          <Typography variant="body2" fontWeight={600}>
-                            @{user.username}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Paper>
-
-                    <Paper 
-                      elevation={0} 
-                      sx={{ 
-                        p: 2, 
-                        bgcolor: 'background.default',
-                        borderRadius: 2,
-                      }}
-                    >
-                      <Stack direction="row" spacing={1.5} alignItems="center">
-                        <EmailIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Email Address
-                          </Typography>
-                          <Typography variant="body2" fontWeight={600} sx={{ wordBreak: 'break-all' }}>
-                            {user.email || "Not provided"}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Paper>
-
-                    {user.phone && (
-                      <Paper 
-                        elevation={0} 
-                        sx={{ 
-                          p: 2, 
-                          bgcolor: 'background.default',
-                          borderRadius: 2,
-                        }}
-                      >
-                        <Stack direction="row" spacing={1.5} alignItems="center">
-                          <PhoneIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">
-                              Phone Number
-                            </Typography>
-                            <Typography variant="body2" fontWeight={600}>
-                              {user.phone}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </Paper>
-                    )}
+                    <Paper sx={{ p: 2 }}><PersonIcon /> @{user.username}</Paper>
+                    <Paper sx={{ p: 2 }}><EmailIcon /> {user.email}</Paper>
+                    {user.phone && <Paper sx={{ p: 2 }}><PhoneIcon /> {user.phone}</Paper>}
                   </Stack>
                 </Stack>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* RIGHT COLUMN - Edit Form */}
+          {/* RIGHT COLUMN */}
           <Grid item xs={12} md={8}>
-            <Card 
-              elevation={0}
-              sx={{ 
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
+            {/* PROFILE INFO */}
+            <Card elevation={0} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
               <CardContent sx={{ p: 4 }}>
-                <Box mb={3}>
-                  <Typography variant="h6" fontWeight={700} mb={0.5}>
-                    Profile Information
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Update your personal details and bio
-                  </Typography>
-                </Box>
-
-                <Divider sx={{ mb: 4 }} />
+                <Typography variant="h6" fontWeight={700} mb={3}>
+                  Profile Information
+                </Typography>
 
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600} 
-                      mb={1.5}
-                      color="text.primary"
-                    >
-                      Username
-                    </Typography>
-                    <TextField
-                      value={user.username}
-                      fullWidth
-                      disabled
-                      size="medium"
-                      placeholder="Username"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: 'background.default',
-                        },
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary" mt={0.5} display="block">
-                      Username cannot be changed
-                    </Typography>
+                    <TextField value={user.username} fullWidth disabled />
                   </Grid>
-
                   <Grid item xs={12}>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600} 
-                      mb={1.5}
-                      color="text.primary"
-                    >
-                      Bio
-                    </Typography>
-                    <TextField
-                      name="bio"
-                      multiline
-                      rows={5}
-                      fullWidth
-                      value={user.bio}
-                      onChange={handleChange}
-                      placeholder="Tell us about yourself..."
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          '&:hover fieldset': {
-                            borderColor: 'primary.main',
-                          },
-                        },
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary" mt={0.5} display="block">
-                      Brief description for your profile
-                    </Typography>
+                    <TextField name="bio" multiline rows={4} value={user.bio} onChange={handleChange} fullWidth />
                   </Grid>
-
                   <Grid item xs={12}>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600} 
-                      mb={1.5}
-                      color="text.primary"
-                    >
-                      Phone Number
-                    </Typography>
-                    <TextField
-                      name="phone"
-                      fullWidth
-                      value={user.phone}
-                      onChange={handleChange}
-                      placeholder="+1 (555) 000-0000"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          '&:hover fieldset': {
-                            borderColor: 'primary.main',
-                          },
-                        },
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary" mt={0.5} display="block">
-                      Your contact phone number
-                    </Typography>
+                    <TextField name="phone" value={user.phone} onChange={handleChange} fullWidth />
                   </Grid>
-
                   <Grid item xs={12}>
-                    <Divider sx={{ my: 2 }} />
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        onClick={fetchProfile}
-                        sx={{
-                          px: 3,
-                          borderWidth: 2,
-                          '&:hover': {
-                            borderWidth: 2,
-                          },
-                        }}
-                      >
-                        Reset
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="large"
-                        onClick={handleUpdate}
-                        sx={{
-                          px: 4,
-                          boxShadow: '0 4px 14px rgba(0,64,102,0.25)',
-                          '&:hover': {
-                            boxShadow: '0 6px 20px rgba(0,64,102,0.35)',
-                          },
-                        }}
-                      >
-                        Save Changes
-                      </Button>
+                      <Button variant="outlined" onClick={fetchProfile}>Reset</Button>
+                      <Button variant="contained" onClick={handleUpdate}>Save Changes</Button>
                     </Stack>
                   </Grid>
                 </Grid>
+              </CardContent>
+            </Card>
+
+            {/* BANK ACCOUNT */}
+            <Card elevation={0} sx={{ mt: 4, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
+              <CardContent sx={{ p: 4 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={700}>Bank Account Details</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Add and manage your bank account information
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={2}>
+                    <Chip
+                      label={bankStatus === "VERIFIED" ? "Verified" : "Non Verified"}
+                      color={bankStatus === "VERIFIED" ? "success" : "warning"}
+                      variant="outlined"
+                    />
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={isEditingBank}
+                      onClick={() => {
+                        setIsEditingBank(true);
+                        setBankStatus("NON_VERIFIED");
+                      }}
+                    >
+                      Change Bank A/c
+                    </Button>
+                  </Stack>
+                </Box>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      disabled={!isEditingBank}
+                      label="A/c Holder Name"
+                      value={bankAccount.accountHolderName}
+                      onChange={(e) =>
+                        setBankAccount({ ...bankAccount, accountHolderName: e.target.value })
+                      }
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      disabled={!isEditingBank}
+                      label="Bank Name"
+                      value={bankAccount.bankName}
+                      onChange={(e) =>
+                        setBankAccount({ ...bankAccount, bankName: e.target.value })
+                      }
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      disabled={!isEditingBank}
+                      label="Bank Branch Address"
+                      value={bankAccount.branchAddress}
+                      onChange={(e) =>
+                        setBankAccount({ ...bankAccount, branchAddress: e.target.value })
+                      }
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      disabled={!isEditingBank}
+                      label="Bank IFSC"
+                      value={bankAccount.ifsc}
+                      onChange={(e) =>
+                        setBankAccount({ ...bankAccount, ifsc: e.target.value })
+                      }
+                    />
+                  </Grid>
+                </Grid>
+
+                {isEditingBank && (
+                  <Box mt={4} display="flex" justifyContent="flex-end" gap={2}>
+                    <Button variant="outlined" onClick={() => setIsEditingBank(false)}>
+                      Cancel
+                    </Button>
+                    <Button variant="contained" onClick={handleBankSubmit}>
+                      Submit
+                    </Button>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </Box>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          elevation={6}
-          severity={snackbar.severity}
-          variant="filled"
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          sx={{
-            borderRadius: 2,
-            fontWeight: 600,
-          }}
-        >
-          {snackbar.message}
-        </Alert>
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
     </>
   );

@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth.routes');
 const videoRoutes = require('./routes/video.routes');
 const userRoutes = require('./routes/user.routes');
 const contactRoutes = require('./routes/contact.routes');
+const bankAccountRoutes = require('./routes/bankAccount.routes');
 
 
 
@@ -61,6 +62,7 @@ app.use('/auth', authRoutes);
 app.use('/videos', videoRoutes);
 app.use('/users', userRoutes)
 app.use('/api/contact', contactRoutes);
+app.use('/api/bank-accounts', bankAccountRoutes);
 
 
 

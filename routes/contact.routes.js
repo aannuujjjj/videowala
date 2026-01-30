@@ -1,4 +1,4 @@
-console.log("CONTACT ROUTE FILE LOADED");
+
 
 const express = require("express");
 const { sendContactMail } = require("../services/mail.service");
