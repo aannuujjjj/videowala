@@ -1,6 +1,7 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const ffmpegPath = require('ffmpeg-static');
 
 const compressVideo = (inputPath) => {
   return new Promise((resolve, reject) => {
@@ -19,8 +20,9 @@ const compressVideo = (inputPath) => {
       ? relativeOutputPath
       : path.join(rootDir, relativeOutputPath);
 
-    // ✅ Use system ffmpeg (installed via winget)
-    const command = `ffmpeg -i "${absoluteInputPath}" -vf "scale='min(1280,iw)':-2" -b:v 800k -preset veryfast -y "${absoluteOutputPath}"`;
+    
+    const command = `"${ffmpegPath}" -i "${absoluteInputPath}" -vf "scale='min(1280,iw)':-2" -b:v 800k -preset veryfast -y "${absoluteOutputPath}"`;
+
 
     exec(command, (error) => {
       if (error) {
