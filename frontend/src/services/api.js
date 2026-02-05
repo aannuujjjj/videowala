@@ -37,6 +37,33 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      const { status, data } = error.response;
+
+      if (
+        status === 401 &&
+        data?.message &&
+        data.message.includes('Logged out')
+      ) {
+        // 🔥 FORCE LOGOUT
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+
+        // Optional: clear deviceId ONLY if you want new device identity
+        // localStorage.removeItem('deviceId');
+
+        // Redirect to login
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 
 // Optional: log once in dev
 if (process.env.NODE_ENV === "development") {

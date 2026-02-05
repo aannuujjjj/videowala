@@ -14,7 +14,8 @@ import AuthInput from '../../components/common/AuthInput';
 import AuthButton from '../../components/common/AuthButton';
 import GoogleButton from '../../components/common/GoogleButton';
 import { loginUser, googleLogin } from '../../services/authService';
-import deviceId from '../../utils/deviceId';
+import deviceId from "../../utils/deviceId";
+
 
 import Logo from '../../assets/Logo.png';
 
