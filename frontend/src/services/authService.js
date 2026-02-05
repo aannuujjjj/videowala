@@ -2,9 +2,8 @@ import api from './api';
 
 export const loginUser = async (data) => {
   const response = await api.post('/auth/login', data);
-  return response.data;
+  return response.data; // { accessToken, refreshToken }
 };
-
 
 export const signupUser = async (data) => {
   const response = await api.post('/auth/register', data);

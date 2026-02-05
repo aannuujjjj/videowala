@@ -14,6 +14,7 @@ import AuthInput from '../../components/common/AuthInput';
 import AuthButton from '../../components/common/AuthButton';
 import GoogleButton from '../../components/common/GoogleButton';
 import { loginUser, googleLogin } from '../../services/authService';
+import deviceId from '../../utils/deviceId';
 
 import Logo from '../../assets/Logo.png';
 
@@ -48,8 +49,13 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const data = await loginUser(form);
-      localStorage.setItem('token', data.token);
+      const data = await loginUser({
+        ...form,
+        deviceId,
+      });
+
+      localStorage.setItem('acesstoken', data.token);
+      localStorage.setItem('refreshtoken', data.refreshToken);
       navigate('/dashboard/all-videos');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
@@ -57,6 +63,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <Box minHeight="100vh" display="flex" bgcolor="#fff">
@@ -163,7 +170,7 @@ const Login = () => {
             </Link>
           </Typography>
 
-          
+
           <Typography variant="body2" mt={1} align="center">
             <Link href="/contact" fontWeight={500}>
               Contact Us

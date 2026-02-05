@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const UserSession = require('../models/UserSession');
+
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -110,10 +112,12 @@ router.post('/register', async (req, res) => {
 ====================================================== */
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, deviceId } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' });
+    if (!email || !password || !deviceId) {
+      return res.status(400).json({
+        message: 'Email, password and deviceId are required',
+      });
     }
 
     const user = await User.findOne({ email });
@@ -126,7 +130,24 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
+    // 🔥 STEP 1: Kill all previous sessions
+    await UserSession.updateMany(
+      { user: user._id, isActive: true },
+      { isActive: false }
+    );
+
+    // 🔐 STEP 2: Create new session
+    const refreshToken = crypto.randomBytes(40).toString('hex');
+
+    await UserSession.create({
+      user: user._id,
+      deviceId,
+      refreshToken,
+      isActive: true,
+    });
+
+    // 🔑 STEP 3: Create JWT
+    const accessToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
@@ -134,9 +155,11 @@ router.post('/login', async (req, res) => {
 
     res.status(200).json({
       message: 'Login successful',
-      token,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
