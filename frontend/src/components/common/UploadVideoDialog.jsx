@@ -25,7 +25,7 @@ export default function UploadVideoDialog({ open, onClose, onUploaded }) {
     severity: "success",
   });
 
-  const token = localStorage.getItem("token");
+
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -47,7 +47,6 @@ export default function UploadVideoDialog({ open, onClose, onUploaded }) {
 
       await api.post("/videos/upload", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });

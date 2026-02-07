@@ -34,16 +34,12 @@ export default function AllVideos() {
     severity: "success", // success | error | warning | info
   });
 
-  const token = localStorage.getItem("token");
+
   const fetchVideos = useCallback(
     async (pageNo) => {
       try {
         setLoading(true);
-        const res = await api.get(`/videos/all?page=${pageNo}&limit=9`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get(`/videos/all?page=${pageNo}&limit=9`);
 
         setVideos(res.data.videos || []);
         setTotalPages(res.data.totalPages || 1);
@@ -58,8 +54,9 @@ export default function AllVideos() {
         setLoading(false);
       }
     },
-    [token] // dependencies used inside
+    [] // ✅ no dependencies
   );
+
   useEffect(() => {
     fetchVideos(page);
   }, [page, fetchVideos]);
@@ -69,9 +66,8 @@ export default function AllVideos() {
   // Confirm delete
   const handleConfirmDelete = async () => {
     try {
-      await api.delete(`/videos/${selectedVideoId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/videos/${selectedVideoId}`);
+
 
       setVideos((prev) =>
         prev.filter((v) => v._id !== selectedVideoId)
@@ -140,7 +136,7 @@ export default function AllVideos() {
               key={video._id}
               video={video}
               apiBase={API_BASE}
-               readOnly={true}   // 👈 hide edit + delete
+              readOnly={true}   // 👈 hide edit + delete
             />
           ))}
         </Box>

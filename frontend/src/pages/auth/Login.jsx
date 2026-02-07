@@ -55,7 +55,7 @@ const Login = () => {
         deviceId,
       });
 
-      localStorage.setItem('acesstoken', data.token);
+      localStorage.setItem('acessToken', data.acesstoken);
       localStorage.setItem('refreshtoken', data.refreshToken);
       navigate('/dashboard/all-videos');
     } catch (err) {
